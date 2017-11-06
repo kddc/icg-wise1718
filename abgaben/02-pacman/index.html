@@ -1,4 +1,4 @@
-﻿<!-- 
+﻿<!--
 
 Purpose of the HTML file: put in all stuff related to the structure of the website
 Put the action in the JavaScript file
@@ -11,7 +11,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 	<head>
 		<meta charset="utf-8"/>
 		<title>WebGL Example</title>
-		
+
 		<script id="vertex-shader" type="x-shader/x-vertex">
 			attribute vec4 vPosition;
 			attribute vec4 vColor;
@@ -27,7 +27,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 			#ifdef GL_ES
 			precision mediump float;
 			#endif
-			
+
 			varying vec4 fColor;
 			void main()
 			{
@@ -42,7 +42,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 		<canvas id="gl-canvas" width="512" height="512">
 			If you see this, your browser doesn't support WebGL.
 		</canvas>
-		
-		<script src="debugMe.js" type="text/javascript"></script>	
+
+		<script src="pacman.js" type="text/javascript"></script>	
 	</body>
 </html>
