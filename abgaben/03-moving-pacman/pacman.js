@@ -28,8 +28,8 @@ function Pacman(x, y, radius, numVertices, program) {
 
 	const vertices = this.vertices(radius, this.numVertices, 60, 0);
 	this.vertexBuffer = new VertexArrayBuffer(vertices, gl.STATIC_DRAW);
-	this.vertexBuffer.addAttribute(new Attribute("vPosition", 2, gl.FLOAT, 0, 0));
-	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 0, numVertices * 8));
+	this.vertexBuffer.addAttribute(new Attribute("vPosition", 4, gl.FLOAT, 0, 0));
+	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 0, numVertices * 16));
 
 	this.program.use();
 	this.program.useBuffer(this.vertexBuffer);
@@ -90,25 +90,24 @@ Pacman.prototype.draw = function () {
 
 Pacman.prototype.vertices = function (radius, numVertices, angleMouth, angleDirection) {
 	// https://www.mathopenref.com/coordcirclealgorithm.html
-	const center = [0, 0];
 	const positions = [];
 	const colors = [];
 	// zieht den radius des Mundes von dem Kreis ab und teilt den Rest
 	// durch die Anzahl der angegebenen Vertices
-	const segment = (360 - angleMouth) / numVertices;
+	const segment = (360 - angleMouth) / (numVertices - 1);
 	// Mitte des Kreises von dem der Fan aufgespannt wird
-	positions.push(0, 0);
+	positions.push(0, 0, 0, 1);
 	// Schleife über die Anzahl der Vertices. Die Größe der einzelnen
 	// Segmente wird durch segment bestimmt
-	for (let i = 0; i <= numVertices; i += 1) {
+	for (let i = 0; i < (numVertices - 1); i++) {
 		// (angleMouth / 2) als Offset damit der Mund zentriert ist
 		const angle = i * segment + (angleMouth / 2) + angleDirection;
-		const x = center[0] + radius * Math.cos(toRad(angle));
-		const y = center[1] - radius * Math.sin(toRad(angle));
-		positions.push(x, y);
+		const x = this.x + radius * Math.cos(toRad(angle));
+		const y = this.y - radius * Math.sin(toRad(angle));
+		positions.push(x, y, 0, 1);
 	}
 
-	for (let i = 0; i < (positions.length / 2); i++) {
+	for (let i = 0; i < numVertices; i++) {
 		colors.push(1, 1, 0, 1);
 	}
 
