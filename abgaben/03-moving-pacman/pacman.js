@@ -1,7 +1,4 @@
 let gl;
-let activeProgram;
-let positions;
-let colors;
 let pacman;
 
 function init() {
@@ -14,66 +11,30 @@ function init() {
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	gl.clearColor(0.5, 0.5, 0.5, 1.0);
 
-	const ret = drawPacman(0.3, 80, 60, 0);
-	positions = ret.positions;
-	colors = ret.colors;
-	pacman = ret.pacman;
- 
-	// 4. Init shader program via additional function and bind it
-	const program = initShaders(gl, "vertex-shader", "fragment-shader");
-	useProgram(program);
+	const program = new ShaderProgram("vertex-shader", "fragment-shader");
+	pacman = new Pacman(0, 0, 0.3, 80, program);
 
-	// 5. Create VBO
-	const vbo = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-
-	// 6. Fill VBO with positions and colors
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions.concat(colors)), gl.STATIC_DRAW);
-
-	// 7. Link data in VBO to shader variables
-	const vPosition = gl.getAttribLocation(program, "vPosition");
-	gl.enableVertexAttribArray(vPosition);
-	gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
-
-	const vColor = gl.getAttribLocation(program, "vColor");
-	gl.enableVertexAttribArray(vColor);
-	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, positions.length * 4);
-
-	// uniforms setzen
-	translate(0, 0);
-	rotateZAxis(0);
-
-	// 8. Render
-	render();
+	gl.clear(gl.COLOR_BUFFER_BIT);
+	pacman.draw();
 }
 
-function onKeyDown(e) {
-	const keyCode = e.which || e.keyCode;
-	const left = 37;
-	const up = 38;
-	const right = 39;
-	const down = 40;
-
-	switch (keyCode) {
-		case left:
-			pacman.rotate(1);
-			break;
-		case right:
-			pacman.rotate(-1);
-			break;
-		case up:
-			pacman.moveForward(0.1);
-			break;
-		default:
-			break;
-	}
-}
-
-function Pacman(x, y, radius) {
+function Pacman(x, y, radius, numVertices, program) {
 	this.x = x;
 	this.y = y;
 	this.orientation = 0.0;
 	this.radius = radius;
+	this.numVertices = numVertices;
+	this.program = program;
+
+	const vertices = this.vertices(radius, this.numVertices, 60, 0);
+	this.vertexBuffer = new VertexArrayBuffer(vertices, gl.STATIC_DRAW);
+	this.vertexBuffer.addAttribute(new Attribute("vPosition", 2, gl.FLOAT, 0, 0));
+	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 0, numVertices * 8));
+
+	this.program.use();
+	this.program.useBuffer(this.vertexBuffer);
+	this.program.setUniform(new UniformMat4f("trans", translateMat4(x, y)));
+	this.program.setUniform(new UniformMat4f("rotate", rotateZAxisMat4(0)));
 }
 
 Pacman.prototype.moveForward = function (dist) {
@@ -108,8 +69,7 @@ Pacman.prototype.move = function (x, y) {
 		this.y = yMax;
 	}
 
-	translate(this.x, this.y);
-	render();
+	this.program.setUniform(new UniformMat4f("trans", translateMat4(this.x, this.y)));
 }
 
 Pacman.prototype.rotate = function (deg) {
@@ -121,23 +81,26 @@ Pacman.prototype.rotate = function (deg) {
 	const normalizedRatio = ratio - Math.floor(ratio);
 	this.orientation = (2 * Math.PI) * normalizedRatio;
 
-	rotateZAxis(this.orientation);
-	render();
+	this.program.setUniform(new UniformMat4f("rotate", rotateZAxisMat4(this.orientation)));
 }
 
-// https://www.mathopenref.com/coordcirclealgorithm.html
-function drawPacman(radius = 1, numberOfVertices = 8, angleMouth = 30, angleDirection = 0) {
+Pacman.prototype.draw = function () {
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, this.numVertices);
+}
+
+Pacman.prototype.vertices = function (radius, numVertices, angleMouth, angleDirection) {
+	// https://www.mathopenref.com/coordcirclealgorithm.html
 	const center = [0, 0];
 	const positions = [];
 	const colors = [];
 	// zieht den radius des Mundes von dem Kreis ab und teilt den Rest
 	// durch die Anzahl der angegebenen Vertices
-	const segment = (360 - angleMouth) / numberOfVertices;
+	const segment = (360 - angleMouth) / numVertices;
 	// Mitte des Kreises von dem der Fan aufgespannt wird
 	positions.push(0, 0);
 	// Schleife über die Anzahl der Vertices. Die Größe der einzelnen
 	// Segmente wird durch segment bestimmt
-	for (let i = 0; i <= numberOfVertices; i += 1) {
+	for (let i = 0; i <= numVertices; i += 1) {
 		// (angleMouth / 2) als Offset damit der Mund zentriert ist
 		const angle = i * segment + (angleMouth / 2) + angleDirection;
 		const x = center[0] + radius * Math.cos(toRad(angle));
@@ -149,55 +112,39 @@ function drawPacman(radius = 1, numberOfVertices = 8, angleMouth = 30, angleDire
 		colors.push(1, 1, 0, 1);
 	}
 
-	const pacman = new Pacman(0, 0, radius);
-
-	return {
-		pacman,
-		positions,
-		colors
-	};
+	return positions.concat(colors);
 }
 
-function translate(x, y) {
-	const mat = new Float32Array([
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		x, y, 0, 1
-	]);
-
-	setUniformMat4fv(activeProgram, "trans", mat);
-}
-
-function rotateZAxis(rad) {
-	const mat = new Float32Array([
-		Math.cos(rad), Math.sin(rad), 0, 0,
-		-Math.sin(rad), Math.cos(rad), 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	]);
-
-	setUniformMat4fv(activeProgram, "rotate", mat);
-}
-
-function setUniformMat4fv(program, uniformName, mat) {
-	const uniform = gl.getUniformLocation(program, uniformName);
-	gl.uniformMatrix4fv(uniform, false, mat);
-}
-
-function useProgram(program) {
-	gl.useProgram(program);
-	activeProgram = program;
-}
-
-// Deg to Rad
 function toRad(angle) {
 	return (angle * Math.PI / 180);
 }
 
-function render() {
-	gl.clear(gl.COLOR_BUFFER_BIT);
-	gl.drawArrays(gl.TRIANGLE_FAN, 0, positions.length / 2);
+function onKeyDown(e) {
+	const keyCode = e.which || e.keyCode;
+	const left = 37;
+	const up = 38;
+	const right = 39;
+	const down = 40;
+
+	switch (keyCode) {
+		case left:
+			pacman.rotate(1);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			pacman.draw();
+			break;
+		case right:
+			pacman.rotate(-1);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			pacman.draw();
+			break;
+		case up:
+			pacman.moveForward(0.1);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			pacman.draw();
+			break;
+		default:
+			break;
+	}
 }
 
 init();

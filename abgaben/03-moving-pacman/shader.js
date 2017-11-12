@@ -27,7 +27,7 @@ ShaderProgram.prototype.useBuffer = function (buffer) {
     for (let attrib of buffer.attributes) {
         const pos = gl.getAttribLocation(this.program, attrib.name);
 
-        if (!pos) {
+        if (pos === -1) {
             throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
         }
 

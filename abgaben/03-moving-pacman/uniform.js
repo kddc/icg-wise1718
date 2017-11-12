@@ -1,15 +1,12 @@
+/**
+ * Ein Uniform mit einer 4x4 Matrix als Typ.
+ * 
+ * @param {String} name Der Name der Uniform Variable im Shader.
+ * @param {Array<Number>} mat Die Matrix, in row-major Ordnung.
+ */
 function UniformMat4f(name, mat) {
     this.name = name;
-
-    const transposed = [];
-    
-    for (let offset = 0; offset < 4; offset++) {
-        for (let stride = 0; stride <= 12; stride += 4) {
-            transposed.push(mat[stride + offset]);
-        }
-    }
-
-    this.mat = new Float32Array(transposed);
+    this.mat = new Float32Array(transpose(mat));
 }
 
 UniformMat4f.prototype.set = function (program) {
