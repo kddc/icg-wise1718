@@ -18,7 +18,7 @@ function init() {
 	positions = ret.positions;
 	colors = ret.colors;
 	pacman = ret.pacman;
-
+ 
 	// 4. Init shader program via additional function and bind it
 	const program = initShaders(gl, "vertex-shader", "fragment-shader");
 	useProgram(program);
