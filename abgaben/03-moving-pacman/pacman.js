@@ -26,10 +26,10 @@ function Pacman(x, y, radius, numVertices, program) {
 	this.numVertices = numVertices;
 	this.program = program;
 
-	const vertices = this.vertices(radius, this.numVertices, 60, 0);
+	const vertices = this.vertices(radius, this.numVertices, 60);
 	this.vertexBuffer = new VertexArrayBuffer(vertices, gl.STATIC_DRAW);
-	this.vertexBuffer.addAttribute(new Attribute("vPosition", 4, gl.FLOAT, 0, 0));
-	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 0, numVertices * 16));
+	this.vertexBuffer.addAttribute(new Attribute("vPosition", 4, gl.FLOAT, 32, 0));
+	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 32, 16));
 
 	this.program.use();
 	this.program.useBuffer(this.vertexBuffer);
@@ -88,30 +88,28 @@ Pacman.prototype.draw = function () {
 	gl.drawArrays(gl.TRIANGLE_FAN, 0, this.numVertices);
 }
 
-Pacman.prototype.vertices = function (radius, numVertices, angleMouth, angleDirection) {
+Pacman.prototype.vertices = function (radius, numVertices, angleMouth) {
 	// https://www.mathopenref.com/coordcirclealgorithm.html
-	const positions = [];
-	const colors = [];
+
+	// Mitte des Kreises von dem der Fan aufgespannt wird
+	const positions = [0, 0, 0, 1, 1, 1, 0, 1];
+	const numOuterVertices = numVertices - 1;
+
 	// zieht den radius des Mundes von dem Kreis ab und teilt den Rest
 	// durch die Anzahl der angegebenen Vertices
-	const segment = (360 - angleMouth) / (numVertices - 1);
-	// Mitte des Kreises von dem der Fan aufgespannt wird
-	positions.push(0, 0, 0, 1);
+	const segment = (360 - angleMouth) / numOuterVertices;
+
 	// Schleife über die Anzahl der Vertices. Die Größe der einzelnen
 	// Segmente wird durch segment bestimmt
-	for (let i = 0; i < (numVertices - 1); i++) {
+	for (let i = 0; i < numOuterVertices; i++) {
 		// (angleMouth / 2) als Offset damit der Mund zentriert ist
-		const angle = i * segment + (angleMouth / 2) + angleDirection;
+		const angle = i * segment + (angleMouth / 2);
 		const x = this.x + radius * Math.cos(toRad(angle));
 		const y = this.y - radius * Math.sin(toRad(angle));
-		positions.push(x, y, 0, 1);
+		positions.push(x, y, 0, 1, 1, 1, 0, 1);
 	}
 
-	for (let i = 0; i < numVertices; i++) {
-		colors.push(1, 1, 0, 1);
-	}
-
-	return positions.concat(colors);
+	return positions;
 }
 
 function toRad(angle) {
