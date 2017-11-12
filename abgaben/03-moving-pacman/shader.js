@@ -1,9 +1,16 @@
+/**
+ * Repräsentiert ein OpenGL Shaderprogramm.
+ * 
+ * @constructor
+ * @param {String} vertexShaderId Die Id des Vertex Shaders im HTML Dokument.
+ * @param {String} fragmentShaderId Die Id des Fragment Shaders im HTML Dokument.
+ */
 function ShaderProgram(vertexShaderId, fragmentShaderId) {
     const vertShaderSrc = document.querySelector('#' + vertexShaderId).text;
     const fragShaderSrc = document.querySelector('#' + fragmentShaderId).text;
 
-    vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertShaderSrc);
-    fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragShaderSrc);
+    vertexShader = compileShader(gl.VERTEX_SHADER, vertShaderSrc);
+    fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragShaderSrc);
 
     const program = gl.createProgram();
     gl.attachShader(program, vertexShader);
@@ -17,10 +24,18 @@ function ShaderProgram(vertexShaderId, fragmentShaderId) {
     this.program = program;
 }
 
+/**
+ * Aktiviert das Shaderprogramm.
+ */
 ShaderProgram.prototype.use = function () {
     gl.useProgram(this.program);
 }
 
+/**
+ * Aktiviert einen Buffer und alle dazugehörigen Attribute für diese Programm.
+ * 
+ * @param {*} buffer Der zu aktivierende Buffer.
+ */
 ShaderProgram.prototype.useBuffer = function (buffer) {
     buffer.bind();
 
@@ -36,11 +51,23 @@ ShaderProgram.prototype.useBuffer = function (buffer) {
     }
 }
 
+/**
+ * Setzt ein Uniform für diese Programm.
+ * 
+ * @param {*} uniform Der Uniform, der aktiviert wird.
+ */
 ShaderProgram.prototype.setUniform = function (uniform) {
     uniform.set(this.program);
 }
 
-function compileShader(gl, shaderType, shaderSource) {
+/**
+ * Kompiliert einen OpenGL Shader.
+ * 
+ * @param {*} shaderType Die Art des Shaders.
+ * @param {String} shaderSource Der Sourcecode des Shaders.
+ * @returns {WebGLShader} Der kompilierte Shader.
+ */
+function compileShader(shaderType, shaderSource) {
     const shader = gl.createShader(shaderType);
     gl.shaderSource(shader, shaderSource);
     gl.compileShader(shader);

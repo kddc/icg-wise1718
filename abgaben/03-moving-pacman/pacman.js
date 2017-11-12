@@ -1,3 +1,7 @@
+/**
+ * Der WebGL Kontext für diesen Thread.
+ * @type {WebGLRenderingContext}
+ */
 let gl;
 let pacman;
 
@@ -5,38 +9,55 @@ function init() {
 
 	// 1. Get canvas and setup WebGL context
 	const canvas = document.getElementById("gl-canvas");
-	gl = canvas.getContext('webgl');
+	gl = canvas.getContext("webgl");
 
 	// 2. Configure viewport
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	gl.clearColor(0.5, 0.5, 0.5, 1.0);
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
-	pacman = new Pacman(0, 0, 0.3, 80, program);
+	pacman = new Pacman(0, 0, 0.3, program);
 
+	// den ersten frame zeichnen
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	pacman.draw();
 }
 
-function Pacman(x, y, radius, numVertices, program) {
+/**
+ * Repräsentiert einen Pacman, der gezeichnet werden kann.
+ * 
+ * @constructor
+ * @param {Number} x Die Startposition in x-Richtung.
+ * @param {Number} y Die Startposition in y-Richtung.
+ * @param {Number} radius Der Radius des Pacman.
+ * @param {ShaderProgram} program Das Shaderprogramm, das den Pacman rendert.
+ */
+function Pacman(x, y, radius, program) {
 	this.x = x;
 	this.y = y;
 	this.orientation = 0.0;
+	this.numVertices = 80;
 	this.radius = radius;
-	this.numVertices = numVertices;
 	this.program = program;
 
+	// vertex buffer füllen
 	const vertices = this.vertices(radius, this.numVertices, 60);
 	this.vertexBuffer = new VertexArrayBuffer(vertices, gl.STATIC_DRAW);
 	this.vertexBuffer.addAttribute(new Attribute("vPosition", 4, gl.FLOAT, 32, 0));
 	this.vertexBuffer.addAttribute(new Attribute("vColor", 4, gl.FLOAT, 32, 16));
 
+	// programm aktivieren und uniforms auf initialwerte setzen
 	this.program.use();
 	this.program.useBuffer(this.vertexBuffer);
-	this.program.setUniform(new UniformMat4f("trans", translateMat4(x, y)));
-	this.program.setUniform(new UniformMat4f("rotate", rotateZAxisMat4(0)));
+	this.program.setUniform(new UniformMat4f("trans", translate(x, y, 0)));
+	this.program.setUniform(new UniformMat4f("rotate", rotateZAxis(0)));
 }
 
+/**
+ * Bewegt den Pacman in Blickrichtung.
+ * 
+ * @param {Number} dist Die Distanz, um die sich der Pacman bewegt, in NDC.
+ */
 Pacman.prototype.moveForward = function (dist) {
 	// x und y für kreis mit r = dist und dem gegebenen winkel
 	const x = dist * Math.cos(this.orientation);
@@ -45,6 +66,12 @@ Pacman.prototype.moveForward = function (dist) {
 	this.move(x, y);
 }
 
+/**
+ * Bewegt den Pacman um den gegebenen Vektor.
+ * 
+ * @param {*} x Die x-Komponente des Vektors.
+ * @param {*} y Die y-Komponente des Vektors.
+ */
 Pacman.prototype.move = function (x, y) {
 	const xMax = 1.0 - this.radius;
 	const xMin = -1.0 + this.radius;
@@ -69,9 +96,14 @@ Pacman.prototype.move = function (x, y) {
 		this.y = yMax;
 	}
 
-	this.program.setUniform(new UniformMat4f("trans", translateMat4(this.x, this.y)));
+	this.program.setUniform(new UniformMat4f("trans", translate(this.x, this.y, 0)));
 }
 
+/**
+ * Dreht den Pacman um den gegebenen Winkel.
+ * 
+ * @param {Number} deg Der Winkel, um den der Pacman gedreht wird, in Grad.
+ */
 Pacman.prototype.rotate = function (deg) {
 	const rad = toRad(deg);
 
@@ -81,13 +113,24 @@ Pacman.prototype.rotate = function (deg) {
 	const normalizedRatio = ratio - Math.floor(ratio);
 	this.orientation = (2 * Math.PI) * normalizedRatio;
 
-	this.program.setUniform(new UniformMat4f("rotate", rotateZAxisMat4(this.orientation)));
+	this.program.setUniform(new UniformMat4f("rotate", rotateZAxis(this.orientation)));
 }
 
+/**
+ * Zeichnet den Pacman in seinem momentanen Zustand.
+ */
 Pacman.prototype.draw = function () {
 	gl.drawArrays(gl.TRIANGLE_FAN, 0, this.numVertices);
 }
 
+/**
+ * Erzeugt ein Array von Vertices für den Pacman.
+ * 
+ * @param {Number} radius Der Radius des Pacman in NDC. 
+ * @param {Number} numVertices Die Anzahl an Vertices, mit denen der Pacman dargestellt wird.
+ * @param {Number} angleMouth Der Winkel des Munds, in Grad.
+ * @returns {Number[]} Das erstellte Vertex-Array.
+ */
 Pacman.prototype.vertices = function (radius, numVertices, angleMouth) {
 	// https://www.mathopenref.com/coordcirclealgorithm.html
 
@@ -112,6 +155,12 @@ Pacman.prototype.vertices = function (radius, numVertices, angleMouth) {
 	return positions;
 }
 
+/**
+ * Konvertiert Winkel in Grad nach Bogenmaß.
+ * 
+ * @param {Number} angle Der Winkel in Grad.
+ * @returns {Number} Der Winkel in Bogenmaß.
+ */
 function toRad(angle) {
 	return (angle * Math.PI / 180);
 }
@@ -123,6 +172,7 @@ function onKeyDown(e) {
 	const right = 39;
 	const down = 40;
 
+	// den zustand von pacman verändern und neuzeichnen
 	switch (keyCode) {
 		case left:
 			pacman.rotate(1);
