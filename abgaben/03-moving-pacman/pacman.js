@@ -23,6 +23,10 @@ function init() {
 	pacman.draw();
 }
 
+function registerEvents() {
+	document.addEventListener("keydown", onKeyDown);
+}
+
 /**
  * Repräsentiert einen Pacman, der gezeichnet werden kann.
  * 
@@ -195,3 +199,4 @@ function onKeyDown(e) {
 }
 
 init();
+registerEvents();
