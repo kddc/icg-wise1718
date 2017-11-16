@@ -3,6 +3,13 @@
  * @type {WebGLRenderingContext}
  */
 let gl;
+
+/**
+ * Der RenderLoop, der alle Elemente beinhaltet, die gezeichnet werden.
+ * @type {RenderLoop}
+ */
+let renderLoop;
+
 let pacman;
 
 function init() {
@@ -18,9 +25,10 @@ function init() {
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
 	pacman = new Pacman(0, 0, 0.3, program);
 
-	// den ersten frame zeichnen
-	gl.clear(gl.COLOR_BUFFER_BIT);
-	pacman.draw();
+	// RenderLoop starten und pacman hinzufügen
+	renderLoop = new RenderLoop();
+	renderLoop.addDrawable(pacman);
+	renderLoop.start();
 }
 
 function registerEvents() {
@@ -180,18 +188,12 @@ function onKeyDown(e) {
 	switch (keyCode) {
 		case left:
 			pacman.rotate(1);
-			gl.clear(gl.COLOR_BUFFER_BIT);
-			pacman.draw();
 			break;
 		case right:
 			pacman.rotate(-1);
-			gl.clear(gl.COLOR_BUFFER_BIT);
-			pacman.draw();
 			break;
 		case up:
 			pacman.moveForward(0.1);
-			gl.clear(gl.COLOR_BUFFER_BIT);
-			pacman.draw();
 			break;
 		default:
 			break;
