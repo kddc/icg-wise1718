@@ -1,63 +1,68 @@
 /**
  * Repräsentiert ein OpenGL Shaderprogramm.
- * 
- * @constructor
- * @param {String} vertexShaderId Die Id des Vertex Shaders im HTML Dokument.
- * @param {String} fragmentShaderId Die Id des Fragment Shaders im HTML Dokument.
  */
-function ShaderProgram(vertexShaderId, fragmentShaderId) {
-    const vertShaderSrc = document.querySelector('#' + vertexShaderId).text;
-    const fragShaderSrc = document.querySelector('#' + fragmentShaderId).text;
+class ShaderProgram {
+    /**
+     * Erstellt ein neues Shaderprogramm.
+     * 
+     * @constructor
+     * @param {String} vertexShaderId Die Id des Vertex Shaders im HTML Dokument.
+     * @param {String} fragmentShaderId Die Id des Fragment Shaders im HTML Dokument.
+     */
+    constructor(vertexShaderId, fragmentShaderId) {
+        const vertShaderSrc = document.querySelector('#' + vertexShaderId).text;
+        const fragShaderSrc = document.querySelector('#' + fragmentShaderId).text;
 
-    vertexShader = compileShader(gl.VERTEX_SHADER, vertShaderSrc);
-    fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragShaderSrc);
+        vertexShader = compileShader(gl.VERTEX_SHADER, vertShaderSrc);
+        fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragShaderSrc);
 
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
 
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        throw new Error("Failed to link shader program: " + gl.getProgramInfoLog(program));
-    }
-
-    this.program = program;
-}
-
-/**
- * Aktiviert das Shaderprogramm.
- */
-ShaderProgram.prototype.use = function () {
-    gl.useProgram(this.program);
-}
-
-/**
- * Aktiviert einen Buffer und alle dazugehörigen Attribute für diese Programm.
- * 
- * @param {*} buffer Der zu aktivierende Buffer.
- */
-ShaderProgram.prototype.useBuffer = function (buffer) {
-    buffer.bind();
-
-    for (let attrib of buffer.attributes) {
-        const pos = gl.getAttribLocation(this.program, attrib.name);
-
-        if (pos === -1) {
-            throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            throw new Error("Failed to link shader program: " + gl.getProgramInfoLog(program));
         }
 
-        gl.enableVertexAttribArray(pos);
-        gl.vertexAttribPointer(pos, attrib.length, attrib.type, false, attrib.stride, attrib.offset);
+        this.program = program;
     }
-}
 
-/**
- * Setzt ein Uniform für diese Programm.
- * 
- * @param {*} uniform Der Uniform, der aktiviert wird.
- */
-ShaderProgram.prototype.setUniform = function (uniform) {
-    uniform.set(this.program);
+    /**
+     * Aktiviert das Shaderprogramm.
+     */
+    use() {
+        gl.useProgram(this.program);
+    }
+
+    /**
+     * Aktiviert einen Buffer und alle dazugehörigen Attribute für diese Programm.
+     * 
+     * @param {*} buffer Der zu aktivierende Buffer.
+     */
+    useBuffer(buffer) {
+        buffer.bind();
+
+        for (let attrib of buffer.attributes) {
+            const pos = gl.getAttribLocation(this.program, attrib.name);
+
+            if (pos === -1) {
+                throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
+            }
+
+            gl.enableVertexAttribArray(pos);
+            gl.vertexAttribPointer(pos, attrib.length, attrib.type, false, attrib.stride, attrib.offset);
+        }
+    }
+
+    /**
+     * Setzt ein Uniform für diese Programm.
+     * 
+     * @param {*} uniform Der Uniform, der aktiviert wird.
+     */
+    setUniform(uniform) {
+        uniform.set(this.program);
+    }
 }
 
 /**

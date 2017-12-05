@@ -1,5 +1,5 @@
 /**
- * Stellt den Render Loop des Programs dar. Der RenderLoop hält eine
+ * Stellt den Render Loop des Programmes dar. Der RenderLoop hält eine
  * Liste mit allen Elementen die gerendert werden sollen.
  */
 class RenderLoop {
