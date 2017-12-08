@@ -29,3 +29,43 @@ class Camera {
         }
     }
 }
+
+class Perspective {
+    constructor(uniformName, programs) {
+        this.uniformName = uniformName;
+        this.programs = programs;
+        this.perspective = [];
+        this.verticalFov = 90;
+        this.ratio = 1;
+        this.near = 1;
+        this.far = 10;
+    }
+
+    setVerticalFov(fov) {
+        this.verticalFov = fov;
+    }
+
+    setRatio(ratio) {
+        this.ratio = ratio;
+    }
+
+    setRatioFromDimension(width, height) {
+        this.setRatio(width / height);
+    }
+
+    setNear(near) {
+        this.near = near;
+    }
+
+    setFar(far) {
+        this.far = far;
+    }
+
+    flush() {
+        mat4.perspective(this.perspective, this.verticalFov, this.ratio, this.near, this.far);
+
+        for (let program of this.programs) {
+            program.setUniform(new UniformMat4(this.uniformName, this.perspective));
+        }
+    }
+}
