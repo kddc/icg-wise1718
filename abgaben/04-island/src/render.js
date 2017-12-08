@@ -5,8 +5,12 @@
 class RenderLoop {
     /**
      * Erzeugt einen neuen RenderLoop
+     * 
+     * @param {ShaderProgram} program Das ShaderProgram, mit dem die
+     * Elemente gerendert werden.
      */
-    constructor() {
+    constructor(program) {
+        this.program = program;
         this.drawables = [];
         this.nextUid = 0;
     }
@@ -19,6 +23,7 @@ class RenderLoop {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         for (let elem of this.drawables) {
+            elem.use(this.program);
             elem.draw();
         }
 
@@ -27,7 +32,7 @@ class RenderLoop {
 
     /**
      * Fügt ein Element hinzu, das gerendert werden soll. Ein Element muss 
-     * eine draw() Methode besitzen.
+     * eine draw() Methode besitzen. 
      * 
      * @param {*} drawable Das Element, das gerendert werden soll.
      */

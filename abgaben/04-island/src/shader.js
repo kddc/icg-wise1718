@@ -36,26 +36,6 @@ class ShaderProgram {
     }
 
     /**
-     * Aktiviert einen Buffer und alle dazugehörigen Attribute für diese Programm.
-     * 
-     * @param {*} buffer Der zu aktivierende Buffer.
-     */
-    useBuffer(buffer) {
-        buffer.bind();
-
-        for (let attrib of buffer.attributes) {
-            const pos = gl.getAttribLocation(this.program, attrib.name);
-
-            if (pos === -1) {
-                throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
-            }
-
-            gl.enableVertexAttribArray(pos);
-            gl.vertexAttribPointer(pos, attrib.length, attrib.type, false, attrib.stride, attrib.offset);
-        }
-    }
-
-    /**
      * Setzt ein Uniform für diese Programm.
      * 
      * @param {*} uniform Der Uniform, der aktiviert wird.
