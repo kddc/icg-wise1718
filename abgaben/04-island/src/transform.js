@@ -60,6 +60,17 @@ class Camera {
             program.setUniform(new UniformMat4(this.uniformName, this.view));
         }
     }
+
+    /**
+     * Führt fn aus und ruft danach flush() auf. Ermöglicht es effizient mehrere Werte
+     * zu setzen, ohne das flushen zu vergessen.
+     * 
+     * @param {*} fn Eine Funktion die als erstes Argument diese Object engegen nimmt. 
+     */
+    autoFlush(fn) {
+        fn(this);
+        this.flush();
+    }
 }
 
 /**
@@ -143,5 +154,16 @@ class Perspective {
         for (let program of this.programs) {
             program.setUniform(new UniformMat4(this.uniformName, this.perspective));
         }
+    }
+
+    /**
+     * Führt fn aus und ruft danach flush() auf. Ermöglicht es effizient mehrere Werte
+     * zu setzen, ohne das flushen zu vergessen.
+     * 
+     * @param {*} fn Eine Funktion die als erstes Argument diese Object engegen nimmt. 
+     */
+    autoFlush(fn) {
+        fn(this);
+        this.flush();
     }
 }
