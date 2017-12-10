@@ -20,7 +20,8 @@ class RenderLoop {
      * den Caller nicht.
      */
     start() {
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        this.program.use();
 
         for (let elem of this.drawables) {
             elem.use(this.program);

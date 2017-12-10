@@ -10,18 +10,71 @@ let gl;
  */
 let renderLoop;
 
+/**
+ * @type {Perspective}
+ */
+let perspective;
+
+/**
+ * @type {Camera}
+ */
+let camera;
+
 
 function main() {
 	const canvas = document.getElementById("gl-canvas");
 	gl = canvas.getContext("webgl");
 
 	gl.viewport(0, 0, canvas.width, canvas.height);
-	gl.clearColor(0.5, 0.5, 0.5, 1.0);
+	gl.enable(gl.DEPTH_TEST);
+	gl.clearColor(0, 0, 0, 1.0);
+
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
 
-	renderLoop = new RenderLoop();
+	perspective = new Perspective("perspective", [program]);
+	perspective.flushWith(_ => {
+		perspective.setFar(100);
+		perspective.setNear(0.1);
+		perspective.setRatioFromDimension(canvas.width, canvas.height);
+		perspective.setVerticalFov(90);
+	});
+
+	camera = new Camera("view", [program]);
+	camera.flushWith(_ => {
+		camera.setPos([0, 0, 0]);
+		camera.setTarget([0, 0, -1]);
+		camera.setUp([0, 1, 0]);
+	});
+
+	renderLoop = new RenderLoop(program);
+	renderLoop.addDrawable(new Island());
 	renderLoop.start();
+}
+
+class Island {
+	constructor() {
+		const data = [
+			-10, 10, -10, 1, 0, 1, 0, 1,
+			10, 10, -10, 1, 0, 1, 0, 1,
+			0, -10, -10, 1, 0, 1, 0, 1
+		];
+
+		this.model = new Model("model");
+		this.numVertices = data.length / 8;
+		this.buffer = new VertexArrayBuffer(data, gl.STATIC_DRAW);
+		this.buffer.addAttribute(new Attribute("pos", 4, gl.FLOAT, 32, 0));
+		this.buffer.addAttribute(new Attribute("color", 4, gl.FLOAT, 32, 16));
+	}
+
+	use(program) {
+		this.model.set(program);
+		this.buffer.use(program);
+	}
+
+	draw() {
+		gl.drawArrays(gl.TRIANGLES, 0, 3);
+	}
 }
 
 function registerEvents() {
