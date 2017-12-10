@@ -32,6 +32,15 @@ class Camera {
     }
 
     /**
+     * Bewegt die Position der Kamera um den gegebenen Wert.
+     * 
+     * @param {Number[]} vec Ein Vec3, der die Positionsänderung beschreibt.
+     */
+    move(vec) {
+        vec3.add(this.pos, this.pos, vec);
+    }
+
+    /**
      * Setzt das Blickziel der Kamera.
      * 
      * @param {Number[]} tgt Ein Vec3 der das Blickziel beschreibt.
