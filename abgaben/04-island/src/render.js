@@ -32,7 +32,7 @@ class RenderLoop {
 
     /**
      * Fügt ein Element hinzu, das gerendert werden soll. Ein Element muss 
-     * eine draw() Methode besitzen. 
+     * eine draw() und ein use(program: ShaderProgram) Methode besitzen. 
      * 
      * @param {*} drawable Das Element, das gerendert werden soll.
      */
