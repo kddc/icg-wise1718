@@ -176,3 +176,80 @@ class Perspective {
         this.flush();
     }
 }
+
+/**
+ * Stellt eine Transformationsmatrix für eine Modell dar. Dieses Object speichert
+ * und setzt die genaue Position des Modells im Weltkoordinatensystem.
+ */
+class Model {
+    /**
+     * Erzeugt eine neue Instanz von Model.
+     * 
+     * @param {String} uniformName Der Name des Uniforms für die Model Matrix.
+     */
+    constructor(uniformName) {
+        this.uniformName = uniformName;
+        this.mat = mat4.create();
+    }
+
+    /**
+     * Verschiebt das Modell um einen gegebenen Vektor.
+     * 
+     * @param {Number[]} vec Der Übersetzungsvektor.
+     */
+    translate(vec) {
+        mat4.translate(this.mat, this.mat4, vec);
+    }
+
+    /**
+     * Skaliert das Modell um die in einem Vektor (x, y, z) gegebenen Faktoren.
+     * 
+     * @param {Number[]} dim Die Skalierungsfaktoren als Vec3.
+     */
+    scale(dim) {
+        mat4.scale(this.mat, this.mat, dim);
+    }
+
+    /**
+     * Rotiert das Modell um einen Winkel um eine Achse.
+     * 
+     * @param {Number[] | String} axis Die Achse, um die rotiert wird, als String für die Hauptachsen oder als Vec3.
+     * @param {Number} angle Der Winkel, um den rotiert wird, in Grad.
+     */
+    rotate(axis, angle) {
+        let axisVec;
+
+        switch (axis) {
+            case "x":
+                axisVec = [1, 0, 0];
+                break;
+            case "y":
+                axisVec = [0, 1, 0];
+                break;
+            case "z":
+                axisVec = [0, 0, 1];
+                break;
+            default:
+                axisVec = angle;
+                break;
+        }
+
+        mat4.rotate(this.mat, this.mat, degToRad(angle), axisVec);
+    }
+
+    /**
+     * Löscht alle Transformationen und stellt eine Identitätsmatrix her.
+     */
+    clear() {
+        this.mat = mat4.create();
+    }
+
+    /**
+     * Setzt die Model-Matrix für ein ShaderProgram.
+     * 
+     * @param {ShaderProgram} program Das Programm, für das diese Model-Matrix gesetzt wird.
+     */
+    set(program) {
+        new UniformMat4(this.uniformName, this.mat).set(program);
+    }
+}
