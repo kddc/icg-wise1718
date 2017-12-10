@@ -19,7 +19,6 @@ class Camera {
         this.pos = [0, 0, 0];
         this.target = [0, 0, -1];
         this.up = [1, 0, 0];
-
     }
 
     /**
@@ -113,7 +112,7 @@ class Perspective {
      * @param {Number} fov Das vertikale FOV in Grad.
      */
     setVerticalFov(fov) {
-        this.verticalFov = degToRad(fov);
+        this.verticalFov = glMatrix.toRadian(fov);
     }
 
     /**
@@ -234,7 +233,7 @@ class Model {
                 break;
         }
 
-        mat4.rotate(this.mat, this.mat, degToRad(angle), axisVec);
+        mat4.rotate(this.mat, this.mat, glMatrix.toRadian(angle), axisVec);
     }
 
     /**
@@ -250,6 +249,6 @@ class Model {
      * @param {ShaderProgram} program Das Programm, für das diese Model-Matrix gesetzt wird.
      */
     set(program) {
-        new UniformMat4(this.uniformName, this.mat).set(program);
+        program.setUniform(new UniformMat4(this.uniformName, this.mat));
     }
 }
