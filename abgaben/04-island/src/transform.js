@@ -65,9 +65,9 @@ class Camera {
      * Führt fn aus und ruft danach flush() auf. Ermöglicht es effizient mehrere Werte
      * zu setzen, ohne das flushen zu vergessen.
      * 
-     * @param {*} fn Eine Funktion die als erstes Argument diese Object engegen nimmt. 
+     * @param {function} fn Eine Funktion die als erstes Argument dieses Object entgegen nimmt. 
      */
-    autoFlush(fn) {
+    flushWith(fn) {
         fn(this);
         this.flush();
     }
@@ -160,9 +160,9 @@ class Perspective {
      * Führt fn aus und ruft danach flush() auf. Ermöglicht es effizient mehrere Werte
      * zu setzen, ohne das flushen zu vergessen.
      * 
-     * @param {*} fn Eine Funktion die als erstes Argument diese Object engegen nimmt. 
+     * @param {function} fn Eine Funktion die als erstes Argument dieses Object entgegen nimmt. 
      */
-    autoFlush(fn) {
+    flushWith(fn) {
         fn(this);
         this.flush();
     }
