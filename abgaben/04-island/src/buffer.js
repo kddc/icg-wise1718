@@ -30,8 +30,8 @@ class VertexArrayBuffer {
     use(program) {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-        for (let attrib of this.buffer.attributes) {
-            const pos = gl.getAttribLocation(program, attrib.name);
+        for (let attrib of this.attributes) {
+            const pos = gl.getAttribLocation(program.getGlProgram(), attrib.name);
 
             if (pos === -1) {
                 throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);

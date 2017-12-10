@@ -13,8 +13,8 @@ class ShaderProgram {
         const vertShaderSrc = document.querySelector('#' + vertexShaderId).text;
         const fragShaderSrc = document.querySelector('#' + fragmentShaderId).text;
 
-        vertexShader = compileShader(gl.VERTEX_SHADER, vertShaderSrc);
-        fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragShaderSrc);
+        const vertexShader = compileShader(gl.VERTEX_SHADER, vertShaderSrc);
+        const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragShaderSrc);
 
         const program = gl.createProgram();
         gl.attachShader(program, vertexShader);
@@ -41,7 +41,17 @@ class ShaderProgram {
      * @param {*} uniform Der Uniform, der aktiviert wird.
      */
     setUniform(uniform) {
+        this.use();
         uniform.set(this.program);
+    }
+
+    /**
+     * Gibt das gekapselte WebGlProgram zurück.
+     * 
+     * @returns {WebGLProgram} Das gekapselte Programm.
+     */
+    getGlProgram() {
+        return this.program;
     }
 }
 
