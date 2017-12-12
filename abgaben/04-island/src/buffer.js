@@ -24,22 +24,9 @@ class VertexArrayBuffer {
 
     /**
      * Aktiviert diesen Buffer.
-     * 
-     * @param {ShaderProgram} program Das zu benutzende Program.
      */
-    use(program) {
+    use() {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
-        for (let attrib of this.attributes) {
-            const pos = gl.getAttribLocation(program.getGlProgram(), attrib.name);
-
-            if (pos === -1) {
-                throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
-            }
-
-            gl.enableVertexAttribArray(pos);
-            gl.vertexAttribPointer(pos, attrib.length, attrib.type, false, attrib.stride, attrib.offset);
-        }
     }
 
     /**
