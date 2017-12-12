@@ -38,7 +38,9 @@ class ShaderProgram {
     /**
      * Setzt ein Uniform für diese Programm.
      * 
-     * @param {*} uniform Der Uniform, der aktiviert wird.
+     * @param {object} uniform Der Uniform, der aktiviert wird.
+     * @param {function} uniform.set Setzt den Uniform für das als Argument übergebene
+     * WebGLProgram.
      */
     setUniform(uniform) {
         this.use();
