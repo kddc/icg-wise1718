@@ -11,9 +11,9 @@ let gl;
 let renderLoop;
 
 /**
- * @type {Perspective}
+ * @type {PerspectiveProjection}
  */
-let perspective;
+let projection;
 
 /**
  * @type {Camera}
@@ -30,12 +30,12 @@ function main() {
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
 
-	perspective = new Perspective("perspective", [program]);
-	perspective.flushWith(_ => {
-		perspective.setFar(100);
-		perspective.setNear(1);
-		perspective.setRatioFromDimension(canvas.width, canvas.height);
-		perspective.setVerticalFov(90);
+	projection = new PerspectiveProjection("projection", [program]);
+	projection.flushWith(_ => {
+		projection.setFar(100);
+		projection.setNear(1);
+		projection.setRatioFromDimension(canvas.width, canvas.height);
+		projection.setVerticalFov(90);
 	});
 
 	camera = new Camera("view", [program]);
