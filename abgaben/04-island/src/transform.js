@@ -10,11 +10,11 @@ class Camera {
      * Erzeugt eine neue Kamera.
      * 
      * @param {String} uniformName Der Name des Uniforms für die View Matrix. 
-     * @param {ShaderProgram[]} programs Ein Array von Programmen, für die die Matrix gesetzt werden soll.
+     * @param {ShaderProgram} program Das Programm, für das die Matrix gesetzt werden soll.
      */
-    constructor(uniformName, programs) {
+    constructor(uniformName, program) {
         this.uniformName = uniformName;
-        this.programs = programs;
+        this.program = program;
         this.view = [];
         this.pos = [0, 0, 0];
         this.target = [0, 0, -1];
@@ -63,10 +63,7 @@ class Camera {
      */
     flush() {
         mat4.lookAt(this.view, this.pos, this.target, this.up);
-
-        for (let program of this.programs) {
-            program.setUniform(new UniformMat4(this.uniformName, this.view));
-        }
+        this.program.setUniform(new UniformMat4(this.uniformName, this.view));
     }
 
     /**
@@ -93,11 +90,11 @@ class PerspectiveProjection {
      * Erzeugt eine neue Perspektive.
      * 
      * @param {String} uniformName Der Name des Uniforms für die Perspective Matrix. 
-     * @param {ShaderProgram[]} programs Ein Array von Programmen, für die die Matrix gesetzt werden soll.
+     * @param {ShaderProgram} program Das Programm, für das die Matrix gesetzt werden soll.
      */
-    constructor(uniformName, programs) {
+    constructor(uniformName, program) {
         this.uniformName = uniformName;
-        this.programs = programs;
+        this.program = program;
         this.perspective = [];
         this.verticalFov = 90;
         this.ratio = 1;
@@ -158,10 +155,7 @@ class PerspectiveProjection {
      */
     flush() {
         mat4.perspective(this.perspective, this.verticalFov, this.ratio, this.near, this.far);
-
-        for (let program of this.programs) {
-            program.setUniform(new UniformMat4(this.uniformName, this.perspective));
-        }
+        this.program.setUniform(new UniformMat4(this.uniformName, this.perspective));
     }
 
     /**

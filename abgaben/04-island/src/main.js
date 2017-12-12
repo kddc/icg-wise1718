@@ -4,48 +4,40 @@
  */
 let gl;
 
-/**
- * Der RenderLoop, der alle Elemente beinhaltet, die gezeichnet werden.
- * @type {RenderLoop}
- */
+/** @type {RenderLoop} */
 let renderLoop;
 
-/**
- * @type {PerspectiveProjection}
- */
+/** @type {PerspectiveProjection} */
 let projection;
 
-/**
- * @type {Camera}
- */
+/** @type {Camera} */
 let camera;
 
 
 function main() {
 	const canvas = document.getElementById("gl-canvas");
 	gl = canvas.getContext("webgl");
-	gl.viewport(0, 0, canvas.width, canvas.height);
 	gl.enable(gl.DEPTH_TEST);
 	gl.clearColor(0, 0, 0, 1.0);
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
-
-	projection = new PerspectiveProjection("projection", [program]);
-	projection.flushWith(_ => {
-		projection.setFar(100);
-		projection.setNear(1);
-		projection.setRatioFromDimension(canvas.width, canvas.height);
-		projection.setVerticalFov(90);
-	});
-
-	camera = new Camera("view", [program]);
+	
+	camera = new Camera("view", program);
 	camera.flushWith(_ => {
 		camera.setPos([0, 0, 0]);
 		camera.setTarget([0, 0, -1]);
 		camera.setUp([0, 1, 0]);
 	});
-
-	renderLoop = new RenderLoop(program);
+	
+	projection = new PerspectiveProjection("projection", program);
+	projection.flushWith(_ => {
+		projection.setFar(100);
+		projection.setNear(1);
+		projection.setVerticalFov(90);
+	});
+	
+	renderLoop = new RenderLoop(program, canvas);
+	renderLoop.setProjectionMatrix(projection);
 	renderLoop.addDrawable(new Island());
 	renderLoop.start();
 
