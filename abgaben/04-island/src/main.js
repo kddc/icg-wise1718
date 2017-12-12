@@ -32,7 +32,7 @@ function main() {
 	projection = new PerspectiveProjection("projection", program);
 	projection.flushWith(_ => {
 		projection.setFar(100);
-		projection.setNear(1);
+		projection.setNear(0.1);
 		projection.setVerticalFov(90);
 	});
 	

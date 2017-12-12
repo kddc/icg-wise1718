@@ -11,9 +11,7 @@ class UniformMat4 {
      */
     constructor(name, mat) {
         this.name = name;
-        this.mat = [];
-        mat4.transpose(this.mat, mat);
-        this.mat = new Float32Array(this.mat);
+        this.mat = mat;
     }
 
     /**
