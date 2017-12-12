@@ -13,29 +13,34 @@ let projection;
 /** @type {Camera} */
 let camera;
 
+/** @type {HTMLCanvasElement} */
+let canvas;
+
+let cameraAngle = -Math.PI / 2;
+
 
 function main() {
-	const canvas = document.getElementById("gl-canvas");
+	canvas = document.getElementById("gl-canvas");
 	gl = canvas.getContext("webgl");
 	gl.enable(gl.DEPTH_TEST);
 	gl.clearColor(0, 0, 0, 1.0);
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
-	
+
 	camera = new Camera("view", program);
 	camera.flushWith(_ => {
-		camera.setPos([-30, 0, 20]);
+		camera.setPos([0, 0, 0]);
 		camera.setLook([0, 0, -1]);
 		camera.setUp([0, 1, 0]);
 	});
-	
+
 	projection = new PerspectiveProjection("projection", program);
 	projection.flushWith(_ => {
 		projection.setFar(100);
 		projection.setNear(0.1);
 		projection.setVerticalFov(90);
 	});
-	
+
 	renderLoop = new RenderLoop(program, canvas);
 	renderLoop.setProjectionMatrix(projection);
 	renderLoop.addDrawable(new Island());
@@ -70,7 +75,86 @@ class Island {
 }
 
 function registerEvents() {
+	const KeyCode = {
+		A: 65,
+		W: 87,
+		S: 83,
+		D: 68,
+		F: 70,
+		Esc: 27
+	};
 
+	const movementDist = 0.5;
+
+	window.addEventListener("keydown", e => {
+		const keycode = e.which || e.keyCode;
+
+		switch (keycode) {
+			case KeyCode.A:
+				moveLeft(movementDist);
+				break;
+			case KeyCode.W:
+				moveForwards(movementDist);
+				break;
+			case KeyCode.S:
+				moveBackwards(movementDist);
+				break;
+			case KeyCode.D:
+				moveRight(movementDist);
+				break;
+			case KeyCode.F:
+				canvas.requestPointerLock();
+				break;
+			case KeyCode.Esc:
+				document.exitPointerLock();
+				break;
+			default:
+				break;
+		}
+	});
+
+	// 90 Grad Rotation für eine Bildschirmlänge	
+	const radPerScreen = Math.PI / 2;
+
+	window.addEventListener("mousemove", e => {
+		// zu drehender Winkel relative zur Distanz die auf dem
+		// Bildschirm bewegt wurde
+		// negativ = links
+		const relMoveX = e.movementX / window.innerWidth;
+		cameraAngle += radPerScreen * relMoveX;
+
+		// x und y für kreis mit r = 1 und dem gegebenen winkel
+		const x = Math.cos(cameraAngle);
+		const z = Math.sin(cameraAngle);
+
+		camera.flushWith(_ => {
+			camera.setLook([x, 0, z]);
+		});
+	});
+}
+
+function moveLeft(amount) {
+	camera.flushWith(_ => {
+		camera.move([-amount, 0, 0]);
+	});
+}
+
+function moveForwards(amount) {
+	camera.flushWith(_ => {
+		camera.move([0, 0, amount]);
+	});
+}
+
+function moveRight(amount) {
+	camera.flushWith(_ => {
+		camera.move([amount, 0, 0]);
+	});
+}
+
+function moveBackwards(amount) {
+	camera.flushWith(_ => {
+		camera.move([0, 0, -amount]);
+	});
 }
 
 main();
