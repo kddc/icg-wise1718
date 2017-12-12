@@ -3,7 +3,7 @@
  * Uniform für die View Matrix.
  * 
  * @description Die gesetzten Werte werden nicht automatisch an den Shader hochgeladen,
- * sondern erst wenn flush() aufgerufen wird.
+ * sondern erst wenn flush/flushWith aufgerufen wird.
  */
 class Camera {
     /**
@@ -86,9 +86,9 @@ class Camera {
  * für die Projektionsmatrix.
  * 
  * @description Die gesetzten Werte werden nicht automatisch an den Shader hochgeladen,
- * sondern erst wenn flush() aufgerufen wird.
+ * sondern erst wenn flush/flushWith aufgerufen wird.
  */
-class Perspective {
+class PerspectiveProjection {
     /**
      * Erzeugt eine neue Perspektive.
      * 

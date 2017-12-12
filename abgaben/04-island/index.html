@@ -17,13 +17,13 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 			attribute vec4 color;
 			uniform mat4 model;
 			uniform mat4 view;
-			uniform mat4 perspective;
+			uniform mat4 projection;
 			varying vec4 frag_color;
 
 			void main()
 			{
 				frag_color = color;
-				gl_Position = perspective * view * model * pos;
+				gl_Position = projection * view * model * pos;
 			}
 		</script>
 		<script id="fragment-shader" type="x-shader/x-fragment">
