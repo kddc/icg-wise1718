@@ -31,11 +31,22 @@ class Camera {
     }
 
     /**
-     * Bewegt die Position der Kamera um den gegebenen Wert.
+     * Bewegt die Position der Kamera um den gegebenen Vektor relativ zum
+     * Kamerakoordinatensystem, das durch den umgedrehten Look-Vektor entlang 
+     * der z-Achse aufgespannt wird (Die z-Achse des Systems liegt auf und in der
+     * Richtung des Look-Vektors).
      * 
      * @param {Number[]} vec Ein Vec3, der die Positionsänderung beschreibt.
      */
     move(vec) {
+        // die Rotation zwischen der z-Achse vom move Vektor und der
+        // z-Achse der Kamerakoordinaten berechnen
+        const rotation = quat.rotationTo([], [0, 0, -1], this.look);
+
+        // den move Vektor in die Kamerakoordinaten transformieren
+        vec3.transformQuat(vec, vec3.multiply(vec, vec, [1, 1, -1]), rotation);
+
+        // die Bewegung ausführen
         vec3.add(this.pos, this.pos, vec);
     }
 
@@ -45,7 +56,8 @@ class Camera {
      * @param {Number[]} look Ein Vec3 der die Blickrichtung beschreibt.
      */
     setLook(look) {
-        this.look = look;
+        // mit normalisiertem look kann move besser rechnen
+        vec3.normalize(this.look, look);
     }
 
     /**
