@@ -35,7 +35,7 @@ function main() {
 	perspective = new Perspective("perspective", [program]);
 	perspective.flushWith(_ => {
 		perspective.setFar(100);
-		perspective.setNear(0.1);
+		perspective.setNear(1);
 		perspective.setRatioFromDimension(canvas.width, canvas.height);
 		perspective.setVerticalFov(90);
 	});
@@ -55,9 +55,9 @@ function main() {
 class Island {
 	constructor() {
 		const data = [
-			-10, 10, -10, 1, 0, 1, 0, 1,
-			10, 10, -10, 1, 0, 1, 0, 1,
-			0, -10, -10, 1, 0, 1, 0, 1
+			-10, -10, -10, 1, 0, 1, 0, 1,
+			10, -10, -10, 1, 0, 1, 0, 1,
+			0, 10, -10, 1, 0, 1, 0, 1
 		];
 
 		this.model = new Model("model");
@@ -69,11 +69,11 @@ class Island {
 
 	use(program) {
 		this.model.set(program);
-		this.buffer.use(program);
+		program.useBuffer(this.buffer);
 	}
 
 	draw() {
-		gl.drawArrays(gl.TRIANGLES, 0, 3);
+		gl.drawArrays(gl.TRIANGLES, 0, this.numVertices);
 	}
 }
 

@@ -46,12 +46,25 @@ class ShaderProgram {
     }
 
     /**
-     * Gibt das gekapselte WebGlProgram zurück.
+     * Aktiviert einen Buffer und alle dazugehörigen Attribute für diese Programm.
      * 
-     * @returns {WebGLProgram} Das gekapselte Programm.
+     * @param {object} buffer Der zu aktivierende Buffer.
+     * @param {function} buffer.use Aktiviert den Buffer.
+     * @param {Attribute[]} buffer.attributes Die zu dem Buffer gehörenden Attribute.
      */
-    getGlProgram() {
-        return this.program;
+    useBuffer(buffer){
+        buffer.use();
+
+        for (let attrib of buffer.attributes) {
+            const pos = gl.getAttribLocation(this.program, attrib.name);
+
+            if (pos === -1) {
+                throw new Error(`Variable '${attrib.name}' does not exist in the shader.`);
+            }
+
+            gl.enableVertexAttribArray(pos);
+            gl.vertexAttribPointer(pos, attrib.length, attrib.type, false, attrib.stride, attrib.offset);
+        }
     }
 }
 
