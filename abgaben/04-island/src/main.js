@@ -24,11 +24,9 @@ let camera;
 function main() {
 	const canvas = document.getElementById("gl-canvas");
 	gl = canvas.getContext("webgl");
-
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	gl.enable(gl.DEPTH_TEST);
 	gl.clearColor(0, 0, 0, 1.0);
-
 
 	const program = new ShaderProgram("vertex-shader", "fragment-shader");
 
@@ -50,6 +48,8 @@ function main() {
 	renderLoop = new RenderLoop(program);
 	renderLoop.addDrawable(new Island());
 	renderLoop.start();
+
+	registerEvents();
 }
 
 class Island {
@@ -82,4 +82,3 @@ function registerEvents() {
 }
 
 main();
-registerEvents();
