@@ -68,7 +68,7 @@ class Island {
 	}
 
 	use(program) {
-		this.model.set(program);
+		program.setUniform(this.model);
 		program.useBuffer(this.buffer);
 	}
 
