@@ -24,8 +24,8 @@ function main() {
 	
 	camera = new Camera("view", program);
 	camera.flushWith(_ => {
-		camera.setPos([0, 0, 0]);
-		camera.setTarget([0, 0, -1]);
+		camera.setPos([-30, 0, 20]);
+		camera.setLook([0, 0, -1]);
 		camera.setUp([0, 1, 0]);
 	});
 	

@@ -17,7 +17,7 @@ class Camera {
         this.program = program;
         this.view = [];
         this.pos = [0, 0, 0];
-        this.target = [0, 0, -1];
+        this.look = [0, 0, -1];
         this.up = [1, 0, 0];
     }
 
@@ -40,12 +40,12 @@ class Camera {
     }
 
     /**
-     * Setzt das Blickziel der Kamera.
+     * Setzt die Blickrichtung der Kamera.
      * 
-     * @param {Number[]} tgt Ein Vec3 der das Blickziel beschreibt.
+     * @param {Number[]} look Ein Vec3 der die Blickrichtung beschreibt.
      */
-    setTarget(tgt) {
-        this.target = tgt;
+    setLook(look) {
+        this.look = look;
     }
 
     /**
@@ -62,7 +62,9 @@ class Camera {
      * lädt sie für alle Shader hoch.
      */
     flush() {
-        mat4.lookAt(this.view, this.pos, this.target, this.up);
+        const target = [];
+        vec3.add(target, this.pos, this.look);
+        mat4.lookAt(this.view, this.pos, target, this.up);
         this.program.setUniform(new UniformMat4(this.uniformName, this.view));
     }
 
