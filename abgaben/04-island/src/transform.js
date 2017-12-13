@@ -56,8 +56,14 @@ class Camera {
      * @param {Number[]} look Ein Vec3 der die Blickrichtung beschreibt.
      */
     setLook(look) {
-        // mit normalisiertem look kann move besser rechnen
+        // mit normalisiertem look kann move/moveLook besser rechnen
         vec3.normalize(this.look, look);
+    }
+
+    moveLook(vec) {
+        vec3.normalize(vec, vec);
+        const rotation = quat.rotationTo([], vec, [0, 0, 1]);
+        this.setLook(vec3.transformQuat([], this.look, rotation));
     }
 
     /**
