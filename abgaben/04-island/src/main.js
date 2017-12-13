@@ -16,8 +16,6 @@ let camera;
 /** @type {HTMLCanvasElement} */
 let canvas;
 
-let cameraAngle = -Math.PI / 2;
-
 
 function main() {
 	canvas = document.getElementById("gl-canvas");
@@ -113,22 +111,28 @@ function registerEvents() {
 		}
 	});
 
-	// 90 Grad Rotation für eine Bildschirmlänge	
-	const radPerScreen = Math.PI / 2;
+	// 180 Grad Rotation für eine Bildschirmlänge	
+	const radPerScreen = Math.PI;
 
 	window.addEventListener("mousemove", e => {
 		// zu drehender Winkel relative zur Distanz die auf dem
 		// Bildschirm bewegt wurde
-		// negativ = links
+		// dadurch ist die Empfindlichkeit auf den Achsen unterschiedlich,
+		// sollte gefixed werden
 		const relMoveX = e.movementX / window.innerWidth;
-		cameraAngle += radPerScreen * relMoveX;
+		const relMoveY = e.movementY / window.innerHeight;
+		const angleX = radPerScreen * relMoveX;
+		const angleY = radPerScreen * -relMoveY;
 
-		// x und y für kreis mit r = 1 und dem gegebenen winkel
-		const x = Math.cos(cameraAngle);
-		const z = Math.sin(cameraAngle);
+		// x und z für kreis mit r = 1 und dem gegebenen winkel
+		const zHor = Math.cos(angleX);
+		const xHor = Math.sin(angleX);
+		const zVert = Math.cos(angleY);
+		const yVert = Math.sin(angleY);
 
 		camera.flushWith(_ => {
-			camera.setLook([x, 0, z]);
+			camera.moveLook([0.01, 0.01, 1]);
+			//camera.moveLook([0, yVert, zVert]);
 		});
 	});
 }
