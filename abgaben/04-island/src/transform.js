@@ -17,17 +17,42 @@ class Camera {
         this.program = program;
         this.view = [];
         this.pos = [0, 0, 0];
+        this.lastPos = [0, 0, 0];
         this.look = [0, 0, -1];
         this.up = [1, 0, 0];
     }
 
     /**
-     * Setzt die Position der Kamera.
+     * Setzt die Position der Kamera. Die Position kann durch das in
+     * onPosChanged callback überschrieben werden.
      * 
      * @param {Number[]} pos Ein Vec3 der die Position beschreibt.
      */
     setPos(pos) {
-        this.pos = pos;
+        this.lastPos = this.pos;
+
+        // event handler aufrufen, um ggfs. pos zu ändern
+        if (this.posChanged) {
+            this.pos = this.posChanged(pos, this.lastPos);
+        } else {
+            this.pos = pos;
+        }
+    }
+
+    /**
+     * @callback Camera~OnPosChanged Überschreibt den Wert einer Positonsänderung.
+     * @param {Number[]} pos Die neue Position die gesetzt werden soll.
+     * @param {Number[]} lastPos Die vorherige Position.
+     * @returns {Number[]} Die tatsächlich Position, die für die Property gesetzt wird.
+     */
+
+    /**
+     * Ermöglicht es den Wert bei einer Positionsänderung zu inspizieren und zu überschreiben.
+     * 
+     * @param {Camera~OnPosChanged} handler Der Handler für das Event.
+     */
+    onPosChanged(handler) {
+        this.posChanged = handler;
     }
 
     /**
@@ -47,7 +72,7 @@ class Camera {
         vec3.transformQuat(vec, vec3.multiply(vec, vec, [1, 1, -1]), rotation);
 
         // die Bewegung ausführen
-        vec3.add(this.pos, this.pos, vec);
+        this.setPos(vec3.add([], this.pos, vec));
     }
 
     /**

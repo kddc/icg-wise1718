@@ -135,6 +135,11 @@ function registerEvents() {
 			//camera.moveLook([0, yVert, zVert]);
 		});
 	});
+
+	// immer in der xz-Ebene bleiben
+	camera.onPosChanged((pos, _) => {
+		return [pos[0], 0, pos[2]];
+	});
 }
 
 function moveLeft(amount) {
