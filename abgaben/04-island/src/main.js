@@ -124,15 +124,14 @@ function registerEvents() {
 		const angleX = radPerScreen * relMoveX;
 		const angleY = radPerScreen * -relMoveY;
 
-		// x und z für kreis mit r = 1 und dem gegebenen winkel
-		const zHor = Math.cos(angleX);
 		const xHor = Math.sin(angleX);
-		const zVert = Math.cos(angleY);
+		const zHor = Math.cos(angleX);
 		const yVert = Math.sin(angleY);
+		const zVert = Math.cos(angleY);
 
 		camera.flushWith(_ => {
-			camera.moveLook([0.01, 0.01, 1]);
-			//camera.moveLook([0, yVert, zVert]);
+			camera.moveLook([xHor, 0, zHor]);
+			camera.moveLook([0, yVert, zVert]);
 		});
 	});
 
