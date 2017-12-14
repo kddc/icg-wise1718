@@ -85,10 +85,31 @@ class Camera {
         vec3.normalize(this.look, look);
     }
 
+    /**
+     * Bewegt den look-Vektor um relativ zu einem gegebenen Vektor, der in einem
+     * Koordinatensystem liegt, dessen z-Achse genau auf dem momentanem look-Vektor in
+     * in der gleichen Richtung liegt.
+     * 
+     * @param {Number[]} vec Ein Vektor in dem gegebenen Koordinatensystem, der die Rotation
+     * des look-Vektors beschreibt.
+     */
     moveLook(vec) {
+        // normalisieren und in rechtshändig konvertieren
         vec3.normalize(vec, vec);
-        const rotation = quat.rotationTo([], vec, [0, 0, 1]);
-        this.setLook(vec3.transformQuat([], this.look, rotation));
+        vec3.multiply(vec, vec, [1, 1, -1]);
+
+        // drehung ausrechnen
+        const rotation = quat.rotationTo([], [0, 0, -1], vec);
+
+        // drehung anwenden und bei mehr als 180 Grad die y-Achse invertieren
+        // um die Richtung auszugleichen
+        const look = vec3.transformQuat([], this.look, rotation);
+
+        if (look[2] >= 0) {
+            look[1] = -look[1];
+        }
+
+        this.setLook(look);
     }
 
     /**
