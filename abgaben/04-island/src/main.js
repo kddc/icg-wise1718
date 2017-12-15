@@ -111,18 +111,20 @@ function registerEvents() {
 		}
 	});
 
-	// 180 Grad Rotation für eine Bildschirmlänge	
-	const radPerScreen = Math.PI;
+	// Mausempfindlichkeit	
+	const sens = 4;
 
 	window.addEventListener("mousemove", e => {
-		// zu drehender Winkel relative zur Distanz die auf dem
-		// Bildschirm bewegt wurde
-		// dadurch ist die Empfindlichkeit auf den Achsen unterschiedlich,
-		// sollte gefixed werden
-		const relMoveX = e.movementX / window.innerWidth;
-		const relMoveY = e.movementY / window.innerHeight;
-		const angleX = radPerScreen * relMoveX;
-		const angleY = radPerScreen * -relMoveY;
+		// relative bewegung zur Fenstergröße
+		const relMoveX = e.movementX / window.outerWidth;
+		const relMoveY = e.movementY / window.outerHeight;
+		// unabhängige Zahl für Empfindlichkeit generieren, muss für y normalisiert werden,
+		// damit beide Werte vergleichbar sind
+		const unitsX = relMoveX;
+		const unitsY = relMoveY * (window.outerHeight / window.outerWidth);
+		// Winkel der Rotation aus gesetzter Empfindlichkeit
+		const angleX = unitsX * sens;
+		const angleY = -unitsY * sens;
 
 		const xHor = Math.sin(angleX);
 		const zHor = Math.cos(angleX);
