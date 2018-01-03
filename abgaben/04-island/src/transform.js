@@ -64,15 +64,20 @@ class Camera {
      * @param {Number[]} vec Ein Vec3, der die Positionsänderung beschreibt.
      */
     move(vec) {
-        // die Rotation zwischen der z-Achse vom move Vektor und der
-        // z-Achse der Kamerakoordinaten berechnen
-        const rotation = quat.rotationTo([], [0, 0, -1], this.look);
+        // in rechtshändiges System umwandeln
+        const moveVec = vec3.multiply(vec, vec, [1, 1, -1]);
 
-        // den move Vektor in die Kamerakoordinaten transformieren
-        vec3.transformQuat(vec, vec3.multiply(vec, vec, [1, 1, -1]), rotation);
+        // die Rotation von der z-Achse zum look- und move-Vektor berechnen
+        const lookRot = quat.rotationTo([], [0, 0, -1], this.look);
+        const moveRot = quat.rotationTo([], [0, 0, -1], vec3.normalize([], moveVec));
+        const rotation = quat.mul([], moveRot, lookRot);
+
+        // Länge anpassen und die z-Achse zum korrekten move-Vektor transformieren
+        let move = [0, 0, -vec3.len(moveVec)];
+        vec3.transformQuat(move, move, rotation);
 
         // die Bewegung ausführen
-        this.setPos(vec3.add([], this.pos, vec));
+        this.setPos(vec3.add([], this.pos, move));
     }
 
     /**
@@ -103,13 +108,13 @@ class Camera {
 
         // drehung anwenden und bei mehr als 180 Grad die y-Achse invertieren
         // um die Richtung auszugleichen
-        const look = vec3.transformQuat([], this.look, rotation);
+        const newLook = vec3.transformQuat([], this.look, rotation);
 
-        if (look[2] >= 0) {
-            look[1] = -look[1];
+        if (newLook[2] >= 0) {
+            newLook[1] = -newLook[1];
         }
 
-        this.setLook(look);
+        this.setLook(newLook);
     }
 
     /**
