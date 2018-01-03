@@ -27,7 +27,7 @@ function main() {
 
 	camera = new Camera("view", program);
 	camera.flushWith(_ => {
-		camera.setPos([0, 0, 0]);
+		camera.setPos([0, 0, 5]);
 		camera.setLook([0, 0, -1]);
 		camera.setUp([0, 1, 0]);
 	});
@@ -41,35 +41,10 @@ function main() {
 
 	renderLoop = new RenderLoop(program, canvas);
 	renderLoop.setProjectionMatrix(projection);
-	renderLoop.addDrawable(new Island());
+	renderLoop.addDrawable(new Cube());
 	renderLoop.start();
 
 	registerEvents();
-}
-
-class Island {
-	constructor() {
-		const data = [
-			-10, -10, -10, 1, 0, 1, 0, 1,
-			10, -10, -10, 1, 0, 1, 0, 1,
-			0, 10, -10, 1, 0, 1, 0, 1
-		];
-
-		this.model = new Model("model");
-		this.numVertices = data.length / 8;
-		this.buffer = new VertexArrayBuffer(data, gl.STATIC_DRAW);
-		this.buffer.addAttribute(new Attribute("pos", 4, gl.FLOAT, 32, 0));
-		this.buffer.addAttribute(new Attribute("color", 4, gl.FLOAT, 32, 16));
-	}
-
-	use(program) {
-		program.setUniform(this.model);
-		program.useBuffer(this.buffer);
-	}
-
-	draw() {
-		gl.drawArrays(gl.TRIANGLES, 0, this.numVertices);
-	}
 }
 
 function registerEvents() {
