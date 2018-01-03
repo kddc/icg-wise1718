@@ -13,17 +13,63 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 		<title>WebGL Example</title>
 
 		<script id="vertex-shader" type="x-shader/x-vertex">
+			const uint num_lights = 10;
+
 			attribute vec4 pos;
-			attribute vec3 color;
+			attribute vec4 normal;
+			attribute vec4 ambient_color;
+			attribute vec3 diff_color;
+			attribute vec3 spec_color;
 			uniform mat4 model;
 			uniform mat4 view;
 			uniform mat4 projection;
+			uniform vec4 lights[num_lights];
+			uniform vec3 intensities[num_lights * 3];
+			uniform uint spec_exp;
+
 			varying vec4 frag_color;
 
 			void main()
 			{
-				frag_color = vec4(color, 1);
-				gl_Position = projection * view * model * pos;
+				vec4 view_pos = view * model * pos;
+				vec4 view_normal = inverse(transpose(view * model)) * normal;
+
+				frag_color = calc_lighting(view_pos, view_normal.xyz);
+				gl_Position = projection * view_pos;
+			}
+
+			vec4 calc_lighting(vec3 view_pos, vec3 view_normal)
+			{
+				for (int i = 0; i < num_lights; i++)
+				{
+					vec3 view_light = view * lights[i];
+					vec3 light_vec = normalize(vec_from_points(view_normal, view_light.xyz));
+					float s = view_normal * dot(light_vec, view_normal) - light_vec;
+					vec3 reflection_vec = reflect(light_vec, view_normal);
+					float ambient_intens = intensities[3 * i];
+					float diff_intens = intensities[3 * i + 1];
+					float spec_intens = intensities[3 * i + 2];
+				}
+			}
+
+			vec3 spec_color()
+			{
+
+			}
+
+			vec3 vec_from_points(vec3 p1, vec3 p2)
+			{
+				float dist_p1 = distance(vec3(0,0,0), p1);
+				float dist_p2 = distance(vec3(0,0,0), p2);
+
+				if (dist_p1 <= dist_p2)
+				{
+					return p2 -p1;
+				}
+				else 
+				{
+					return p1 -p2;
+				}
 			}
 		</script>
 		<script id="fragment-shader" type="x-shader/x-fragment">
