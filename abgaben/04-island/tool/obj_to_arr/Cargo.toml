@@ -1,0 +1,8 @@
+[package]
+name = "obj_to_arr"
+version = "0.1.0"
+authors = ["Robin Mirow <robinmirow@live.com>"]
+
+[dependencies]
+structopt = "0.1.6"
+structopt-derive = "0.1.6"

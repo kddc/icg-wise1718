@@ -1,0 +1,5 @@
+control_brace_style = "AlwaysNextLine"
+brace_style = "AlwaysNextLine"
+max_width = 120
+wrap_comments = true
+comment_width = 120
