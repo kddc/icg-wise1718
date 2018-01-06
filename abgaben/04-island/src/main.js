@@ -13,6 +13,9 @@ let projection;
 /** @type {Camera} */
 let camera;
 
+/** @type {UniformMat4} */
+let normalViewmodelName;
+
 /** @type {HTMLCanvasElement} */
 let canvas;
 
@@ -57,7 +60,7 @@ function registerEvents() {
 		Esc: 27
 	};
 
-	const movementDist = 0.5;
+	const movementDist = 0.2;
 
 	window.addEventListener("keydown", e => {
 		const keycode = e.which || e.keyCode;

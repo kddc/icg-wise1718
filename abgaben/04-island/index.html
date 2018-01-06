@@ -13,62 +13,108 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 		<title>WebGL Example</title>
 
 		<script id="vertex-shader" type="x-shader/x-vertex">
-			const uint num_lights = 10;
-
+			const int num_lights = 1;
+			const float light_c1 = 1.0;
+			const float light_c2 = 0.0005;
+			const float light_c3 = 0.000003;
+			
 			attribute vec4 pos;
-			attribute vec4 normal;
-			attribute vec4 ambient_color;
-			attribute vec3 diff_color;
-			attribute vec3 spec_color;
+			attribute vec3 normal;
+			attribute float hardness;
+			attribute float alpha;
+			attribute vec3 ambient_col;
+			attribute vec3 diffuse_col;
+			attribute vec3 specular_col;
 			uniform mat4 model;
 			uniform mat4 view;
+			uniform mat4 normal_viewmodel;
 			uniform mat4 projection;
-			uniform vec4 lights[num_lights];
-			uniform vec3 intensities[num_lights * 3];
-			uniform uint spec_exp;
 
+			// lighting
+			vec4 lights_pos[num_lights];
+			vec3 lights_diffuse[num_lights];
+			vec3 lights_specular[num_lights];
+			const float light_ambient = 0.0;
+			
 			varying vec4 frag_color;
-
+			
+			
+			void init();
+			vec4 calc_lighting(vec4 view_pos, vec3 view_normal);
+			vec3 spec_color(vec3 intensity, vec3 spec_col, vec3 reflect, vec3 cam);
+			vec3 diff_color(vec3 intensity, vec3 diff_col, vec3 light_vec, vec3 normal);
+			float light_reduction(float dist);
+			vec3 vec_from_points(vec3 p1, vec3 p2);
+			
 			void main()
 			{
-				vec4 view_pos = view * model * pos;
-				vec4 view_normal = inverse(transpose(view * model)) * normal;
+				init();
 
-				frag_color = calc_lighting(view_pos, view_normal.xyz);
+				vec4 view_pos = view * model * pos;
+				vec4 view_normal = normalize(normal_viewmodel * vec4(normal, 1));
+				
+				frag_color = calc_lighting(view_pos, normalize(view_normal.xyz));
 				gl_Position = projection * view_pos;
 			}
 
-			vec4 calc_lighting(vec3 view_pos, vec3 view_normal)
+			void init()
 			{
+				lights_pos[0] = vec4(40, 100, 40, 1);
+				lights_diffuse[0] = vec3(2, 2, 2);
+				lights_specular[0] = vec3(0.0, 0.0, 0.0);
+			}
+			
+			vec4 calc_lighting(vec4 view_pos, vec3 view_normal)
+			{
+				vec3 ambient_part = light_ambient * ambient_col;
+				vec3 dyn_part = vec3(0, 0, 0);
+			
 				for (int i = 0; i < num_lights; i++)
 				{
-					vec3 view_light = view * lights[i];
+					vec4 view_light = view * lights_pos[i];
+					float dist = distance(view_pos, view_light);
+			
+					vec3 cam_vec = vec_from_points(view_pos.xyz, view_light.xyz);
 					vec3 light_vec = normalize(vec_from_points(view_normal, view_light.xyz));
-					float s = view_normal * dot(light_vec, view_normal) - light_vec;
-					vec3 reflection_vec = reflect(light_vec, view_normal);
-					float ambient_intens = intensities[3 * i];
-					float diff_intens = intensities[3 * i + 1];
-					float spec_intens = intensities[3 * i + 2];
+					vec3 reflection_vec = normalize(reflect(light_vec, view_normal));
+			
+					dyn_part += 
+						light_reduction(dist) 
+						* (diff_color(lights_diffuse[i], diffuse_col, light_vec, view_normal) 
+						+ spec_color(lights_specular[i], specular_col, reflection_vec, cam_vec));
 				}
+			
+				return vec4(ambient_part + dyn_part, alpha);
 			}
-
-			vec3 spec_color()
+			
+			vec3 diff_color(vec3 intensity, vec3 diff_col, vec3 light_vec, vec3 normal)
 			{
-
+				return intensity * diff_col * max(0.0, dot(light_vec, normal));
 			}
-
+			
+			vec3 spec_color(vec3 intensity, vec3 spec_col, vec3 reflect, vec3 cam)
+			{
+				return intensity * spec_col * pow(max(0.0, dot(reflect, cam)), hardness);
+			}
+			
+			float light_reduction(float dist)
+			{
+				return min(1.0, 1.0 / (light_c1 + light_c2 * dist + light_c3 * pow(dist, 2.0)));
+			}
+			
 			vec3 vec_from_points(vec3 p1, vec3 p2)
 			{
+				// TODO: fix
 				float dist_p1 = distance(vec3(0,0,0), p1);
 				float dist_p2 = distance(vec3(0,0,0), p2);
-
+			
 				if (dist_p1 <= dist_p2)
 				{
-					return p2 -p1;
+					return p2 - p1;
 				}
 				else 
 				{
-					return p1 -p2;
+					return p1 - p2;
 				}
 			}
 		</script>
@@ -93,7 +139,6 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 		<script type="text/javascript" src="lib/gl-matrix.js"></script>
 
 		<!-- Models -->
-		<script type="text/javascript" src="src/model/cube.js"></script>
 		<script type="text/javascript" src="src/model/island.js"></script>
 		<script type="text/javascript" src="src/model/island_model.js"></script>
 	</head>
