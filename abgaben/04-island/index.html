@@ -14,7 +14,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 
 		<script id="vertex-shader" type="x-shader/x-vertex">
 			attribute vec4 pos;
-			attribute vec4 color;
+			attribute vec3 color;
 			uniform mat4 model;
 			uniform mat4 view;
 			uniform mat4 projection;
@@ -22,7 +22,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 
 			void main()
 			{
-				frag_color = color;
+				frag_color = vec4(color, 1);
 				gl_Position = projection * view * model * pos;
 			}
 		</script>
@@ -48,6 +48,8 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 
 		<!-- Models -->
 		<script type="text/javascript" src="src/model/cube.js"></script>
+		<script type="text/javascript" src="src/model/island.js"></script>
+		<script type="text/javascript" src="src/model/island_model.js"></script>
 	</head>
 	<body style="margin-top: 0px;margin-left: 0px;margin-bottom: 0px;margin-right: 0px;overflow: hidden;">
 		<canvas id="gl-canvas">

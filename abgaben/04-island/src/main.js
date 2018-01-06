@@ -27,7 +27,7 @@ function main() {
 
 	camera = new Camera("view", program);
 	camera.flushWith(_ => {
-		camera.setPos([0, 0, 5]);
+		camera.setPos([0, 1, 5]);
 		camera.setLook([0, 0, -1]);
 		camera.setUp([0, 1, 0]);
 	});
@@ -41,7 +41,7 @@ function main() {
 
 	renderLoop = new RenderLoop(program, canvas);
 	renderLoop.setProjectionMatrix(projection);
-	renderLoop.addDrawable(new Cube());
+	renderLoop.addDrawable(new Island());
 	renderLoop.start();
 
 	registerEvents();
@@ -112,9 +112,9 @@ function registerEvents() {
 		});
 	});
 
-	// immer in der xz-Ebene bleiben
-	camera.onPosChanged((pos, _) => {
-		return [pos[0], 0, pos[2]];
+	// immer in der gleichen xz-Ebene bleiben
+	camera.onPosChanged((pos, lastPos) => {
+		return [pos[0], lastPos[1], pos[2]];
 	});
 }
 
