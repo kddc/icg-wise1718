@@ -13,7 +13,7 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 		<title>WebGL Example</title>
 
 		<script id="vertex-shader" type="x-shader/x-vertex">
-			const int num_lights = 1;
+			const int num_lights = 3;
 			const float light_c1 = 1.0;
 			const float light_c2 = 0.0005;
 			const float light_c3 = 0.000003;
@@ -40,31 +40,39 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 			
 			
 			void init();
-			vec4 calc_lighting(vec4 view_pos, vec3 view_normal);
-			vec3 spec_color(vec3 intensity, vec3 spec_col, vec3 reflect, vec3 cam);
-			vec3 diff_color(vec3 intensity, vec3 diff_col, vec3 light_vec, vec3 normal);
+			vec4 calc_lighting(vec4 view_pos, vec4 view_normal);
+			vec3 diff_color(vec3 intensity, vec3 diff_col, vec4 light_vec, vec4 normal);
+			vec3 spec_color(vec3 intensity, vec3 spec_col, vec4 reflection_vec, vec4 cam);
 			float light_reduction(float dist);
-			vec3 vec_from_points(vec3 p1, vec3 p2);
+			vec4 direction_to(vec4 start, vec4 end);
 			
 			void main()
 			{
 				init();
 
 				vec4 view_pos = view * model * pos;
-				vec4 view_normal = normalize(normal_viewmodel * vec4(normal, 1));
+				vec4 view_normal = normalize(normal_viewmodel * vec4(normal, 0));
 				
-				frag_color = calc_lighting(view_pos, normalize(view_normal.xyz));
+				frag_color = calc_lighting(view_pos, view_normal);
 				gl_Position = projection * view_pos;
 			}
 
 			void init()
 			{
-				lights_pos[0] = vec4(40, 100, 40, 1);
+				lights_pos[0] = vec4(50, 40, 20, 1);
 				lights_diffuse[0] = vec3(2, 2, 2);
 				lights_specular[0] = vec3(0.0, 0.0, 0.0);
+
+				lights_pos[1] = vec4(-50, 40, -20, 1);
+				lights_diffuse[1] = vec3(1.5, 0.75, 0);
+				lights_specular[1] = vec3(0.0, 0.0, 0.0);
+
+				lights_pos[2] = vec4(50, 40, 20, 1);
+				lights_diffuse[2] = vec3(1, 0.5, 0.1);
+				lights_specular[2] = vec3(2, 1, 0.0);
 			}
 			
-			vec4 calc_lighting(vec4 view_pos, vec3 view_normal)
+			vec4 calc_lighting(vec4 view_pos, vec4 view_normal)
 			{
 				vec3 ambient_part = light_ambient * ambient_col;
 				vec3 dyn_part = vec3(0, 0, 0);
@@ -74,9 +82,9 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 					vec4 view_light = view * lights_pos[i];
 					float dist = distance(view_pos, view_light);
 			
-					vec3 cam_vec = vec_from_points(view_pos.xyz, view_light.xyz);
-					vec3 light_vec = normalize(vec_from_points(view_normal, view_light.xyz));
-					vec3 reflection_vec = normalize(reflect(light_vec, view_normal));
+					vec4 cam_vec = normalize(vec4(-(view_pos.xyz), 0));
+					vec4 light_vec = normalize(direction_to(view_pos, view_light));
+					vec4 reflection_vec = normalize(reflect(light_vec, view_normal));
 			
 					dyn_part += 
 						light_reduction(dist) 
@@ -87,14 +95,14 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 				return vec4(ambient_part + dyn_part, alpha);
 			}
 			
-			vec3 diff_color(vec3 intensity, vec3 diff_col, vec3 light_vec, vec3 normal)
+			vec3 diff_color(vec3 intensity, vec3 diff_col, vec4 light_vec, vec4 normal)
 			{
 				return intensity * diff_col * max(0.0, dot(light_vec, normal));
 			}
 			
-			vec3 spec_color(vec3 intensity, vec3 spec_col, vec3 reflect, vec3 cam)
+			vec3 spec_color(vec3 intensity, vec3 spec_col, vec4 reflection_vec, vec4 cam_vec)
 			{
-				return intensity * spec_col * pow(max(0.0, dot(reflect, cam)), hardness);
+				return intensity * spec_col * pow(max(0.0, dot(reflection_vec, cam_vec)), hardness);
 			}
 			
 			float light_reduction(float dist)
@@ -102,20 +110,9 @@ Assign IDs to the shaders as well as the canvas to reference them directly in yo
 				return min(1.0, 1.0 / (light_c1 + light_c2 * dist + light_c3 * pow(dist, 2.0)));
 			}
 			
-			vec3 vec_from_points(vec3 p1, vec3 p2)
+			vec4 direction_to(vec4 start, vec4 end)
 			{
-				// TODO: fix
-				float dist_p1 = distance(vec3(0,0,0), p1);
-				float dist_p2 = distance(vec3(0,0,0), p2);
-			
-				if (dist_p1 <= dist_p2)
-				{
-					return p2 - p1;
-				}
-				else 
-				{
-					return p1 - p2;
-				}
+				return end - start;
 			}
 		</script>
 		<script id="fragment-shader" type="x-shader/x-fragment">
