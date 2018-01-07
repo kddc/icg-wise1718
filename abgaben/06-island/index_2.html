@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Zettel 6 - Aufgabe 2</title>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 vPosition;
+      attribute vec4 vColor;
+      // TODO: Normalen als attribute übergeben
+      attribute vec3 vNormal;
+
+      // transformation matrices
+      uniform mat4 modelMatrix;
+      uniform mat4 projectionMatrix;
+      uniform mat4 viewMatrix;
+      // TODO: Erhalte hier die Normalmatrix
+      uniform mat4 normalMatrix;
+      // TODO: Erhalte hier die Lichtposition
+      uniform vec4 lightPosition;
+
+      // calculated color using the Phong illumination model
+      varying vec4 fColor;
+
+      varying vec3 N;
+      varying vec3 L;
+      varying vec3 R;
+      varying vec3 V;
+
+      void main()
+      {
+        mat4 modelViewMatrix = viewMatrix * modelMatrix;
+        vec4 position = modelViewMatrix * vPosition;
+
+        gl_Position = projectionMatrix * position;
+
+        // TODO: Rechne alle übergebenen Koordinaten (Lichtposition, Normalen) in das Kamerakoordinatensystem um
+        vec4 lightPos = modelViewMatrix * lightPosition;
+        vec4 normalPos = normalMatrix * vec4(vNormal, 0.0);
+        // TODO: Berechne und normiere die Vektoren L, N, R und V.
+        //       Denke daran, dass du für die Normierung nur die Koordinaten x, y und z berücksichtigst.
+        N = normalize(normalPos.xyz);
+        L = normalize(lightPos.xyz - position.xyz);
+        R = reflect(-L, N);
+        V = normalize(-position.xyz);
+
+        fColor = vColor;
+      }
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 fColor;
+
+      // TODO: Speichere alle übergebenen Koeffizienten als Uniform-Variablen
+      uniform vec3 Ia;
+      uniform vec3 Id;
+      uniform vec3 Is;
+      uniform vec3 ka;
+      uniform vec3 kd;
+      uniform vec3 ks;
+      // TODO: Setze alle Konstanten c_1, c_2, c_3, n als const ein
+      const float c_1 = 0.7;
+      const float c_2 = 0.0005;
+      const float c_3 = 0.000003;
+      const float n	  = 3.0;
+
+      // varying vec3 FragmentIntensity;
+      varying vec3 N;
+      varying vec3 L;
+      varying vec3 R;
+      varying vec3 V;
+
+      void main()
+      {
+        // TODO: Berechne die Koeffizienten d, sowie f_{att}
+        float d = length(L);
+        float f_att = min(1.0 / (c_1 + (c_2 * d) + (c_3 + pow(d, 2.0))), 1.0);
+        // TODO: Berechne die Farbe mit der Phong-Beleuchtungsgleichung
+        vec3 Intensity = Ia * ka + f_att * (Id * kd * max(0.0, dot(N,L)) + Is * ks * pow(max(0.0, dot(R,V)), n));
+        gl_FragColor = fColor * vec4(Intensity, 1.0);
+        clamp(gl_FragColor, 0.0, 1.0);
+      }
+    </script>
+    <script type="text/javascript" src="common/initShaders.js">
+    </script>
+    <script type="text/javascript" src="common/gl-matrix.js">
+    </script>
+  </head>
+  <body>
+    <canvas id="gl-canvas" width="720" height="560">
+      If you see this, your browser doesn't support WebGL.
+    </canvas>
+    <script type="text/javascript" src="src/model.js"></script>
+    <script type="text/javascript" src="src/cube.js"></script>
+    <script type="text/javascript" src="src/trunk.js"></script>
+    <script type="text/javascript" src="src/leaf.js"></script>
+    <script type="text/javascript" src="src/main.js"></script>
+  </body>
+</html>
