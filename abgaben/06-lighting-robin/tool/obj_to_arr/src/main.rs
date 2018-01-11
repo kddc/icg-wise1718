@@ -77,7 +77,7 @@ fn parse_obj(file: &Path) -> Result<HashMap<String, Vec<Vertex>>, ParseError>
     let reader = BufReader::new(File::open(file)?);
 
     let mut result: HashMap<String, Vec<Vertex>> = HashMap::new();
-    let mut buffer = Vec::with_capacity(10_0000);
+    let mut buffer = Vec::with_capacity(10_000);
     let mut current_obj = String::new();
     let mut materials = HashMap::with_capacity(100);
     let mut current_mtl = None;
